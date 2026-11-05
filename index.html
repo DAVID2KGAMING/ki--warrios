@@ -88,6 +88,7 @@ function releasePtr(e, fire) {
 }
 cv.addEventListener('pointerdown', e => {
   audInit(); cv.focus(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  toggleFullscreen(true);
   const r = cv.getBoundingClientRect(), [x, y] = toV(e.clientX - r.left, e.clientY - r.top);
   TCH.ripples.push({ x, y, t: 0 });
   const cs = Screens.cur;
@@ -208,8 +209,12 @@ function musicTick() {
     AUD.step++; AUD.next += dur;
   }
 }
-function toggleFullscreen() {
-  try { const d = document, e = d.documentElement; if (!d.fullscreenElement) { (e.requestFullscreen || e.webkitRequestFullscreen)?.call(e); screen.orientation?.lock?.('landscape').catch(() => {}); } else d.exitFullscreen?.(); } catch (e) {}
+function toggleFullscreen(auto) {
+  try {
+    const d = document, e = d.documentElement;
+    if (!d.fullscreenElement) { (e.requestFullscreen || e.webkitRequestFullscreen)?.call(e); screen.orientation?.lock?.('landscape').catch(() => {}); }
+    else if (!auto) d.exitFullscreen?.();
+  } catch (e) {}
 }
 
 /* ============================================================
@@ -236,7 +241,7 @@ const HEROES = [
       { n: 'BASE', hair: '#0b1020', aura: '#3b82f6', atk: 1, spd: 1, tier: 0 },
       { n: 'AZURE ASCENT', hair: '#22d3ee', aura: '#22d3ee', atk: 1.15, spd: 1.1, triple: true, tier: 1 }],
     special: ['Nova Cannon', '#a78bfa'], ultimate: 'Final Nova', passive: 'Azure form: Triple Ki Blast' },
-  { id: 'rex', name: 'REX', style: 'Time Blade', hair: 'swept', blast: '#fdba74', sword: true,
+  { id: 'rex', name: 'REX', style: 'Time Blade', hair: 'swept', blast: '#fdba74', sword: true, cape: true,
     look: { skin: '#fcd9b6', gi: '#334155', trim: '#a78bfa', limb: 'gi' },
     stats: { hp: 0.95, atk: 1.05, spd: 1.1, ki: 0.95 },
     forms: [
@@ -248,7 +253,7 @@ const HEROES = [
     stats: { hp: 1.05, atk: 0.95, spd: 0.95, ki: 1.1 }, passive_regen: true,
     forms: [{ n: 'BASE', hair: '#e2e8f0', aura: '#e2e8f0', atk: 1, spd: 1, tier: 0 }],
     special: ['Drill Beam', '#f0abfc'], ultimate: 'Orb Storm', passive: 'Regenerates 1% HP every 3s unhit · beam pierces Block' },
-  { id: 'nyx', name: 'NYX', style: 'Void Emperor', hair: 'dome', blast: '#f9a8d4',
+  { id: 'nyx', name: 'NYX', style: 'Void Emperor', hair: 'dome', blast: '#f9a8d4', cape: true,
     look: { skin: '#f1f5f9', gi: '#7c3aed', trim: '#a78bfa', limb: 'skin' },
     stats: { hp: 0.9, atk: 1.15, spd: 1.1, ki: 1.0 },
     forms: [
@@ -258,8 +263,11 @@ const HEROES = [
   { id: 'omega', name: 'OMEGA', style: 'Bio Android', hair: 'crest', blast: '#bef264',
     look: { skin: '#84cc16', gi: '#166534', trim: '#111827', limb: 'skin', spots: true },
     stats: { hp: 1.1, atk: 1.0, spd: 0.95, ki: 1.0 },
-    forms: [{ n: 'BASE', hair: '#365314', aura: '#84cc16', atk: 1, spd: 1, tier: 0 }],
-    special: ['Mirror Barrier', '#4ade80'], ultimate: 'Solar Wave', passive: 'Melee hits absorb 5% Ki' },
+    forms: [
+      { n: 'BASE', hair: '#365314', aura: '#84cc16', atk: 1, spd: 1, tier: 0 },
+      { n: 'OVERCLOCK', hair: '#a3e635', aura: '#bef264', atk: 1.25, spd: 1.2, tier: 2 },
+      { n: 'PERFECT FORM', hair: '#fde047', skin: '#d9f99d', aura: '#fef08a', aura2: '#4ade80', atk: 1.6, spd: 1.35, explosive: true, tier: 4 }],
+    special: ['Mirror Barrier', '#4ade80'], ultimate: 'Solar Wave', passive: 'Melee hits absorb 5% Ki · Perfect Form: explosive attacks' },
   { id: 'blaze', name: 'BLAZE', style: 'Flame Brawler', hair: 'spiky', blast: '#fdba74',
     look: { skin: '#f5c9a0', gi: '#7f1d1d', trim: '#fbbf24', limb: 'gi' },
     stats: { hp: 1.05, atk: 1.1, spd: 1.0, ki: 0.95 },
@@ -274,14 +282,14 @@ const HEROES = [
       { n: 'BASE', hair: '#e2e8f0', aura: '#a5f3fc', atk: 1, spd: 1, tier: 0 },
       { n: 'GLACIER', hair: '#67e8f9', aura: '#22d3ee', atk: 1.15, spd: 1.2, triple: true, tier: 1 }],
     special: ['Ice Comet', '#a5f3fc'], ultimate: 'Absolute Zero', passive: 'Glacier: Triple Ki Blast' },
-  { id: 'titan', name: 'TITAN', style: 'Iron Giant', hair: 'dome', blast: '#fde68a',
+  { id: 'titan', name: 'TITAN', style: 'Iron Giant', hair: 'dome', blast: '#fde68a', armor: true,
     look: { skin: '#d6a77a', gi: '#374151', trim: '#fbbf24', limb: 'skin' },
     stats: { hp: 1.25, atk: 1.12, spd: 0.85, ki: 0.9 },
     forms: [
       { n: 'BASE', hair: '#6b7280', aura: '#9ca3af', atk: 1, spd: 1, tier: 0 },
       { n: 'BERSERK', hair: '#ef4444', skin: '#e0907a', aura: '#ef4444', atk: 1.3, spd: 1.12, tier: 1 }],
     special: ['Quake Wave', '#fbbf24'], ultimate: 'Meteor Slam', passive: 'Heavy: huge HP pool' },
-  { id: 'shade', name: 'SHADE', style: 'Night Assassin', hair: 'swept', blast: '#c4b5fd', sword: true,
+  { id: 'shade', name: 'SHADE', style: 'Night Assassin', hair: 'swept', blast: '#c4b5fd', sword: true, cape: true,
     look: { skin: '#e8c9a8', gi: '#1f2937', trim: '#a78bfa', limb: 'gi' },
     stats: { hp: 0.9, atk: 1.1, spd: 1.2, ki: 1.0 },
     forms: [
@@ -309,14 +317,14 @@ const HEROES = [
       { n: 'BASE', hair: '#94a3b8', aura: '#bae6fd', atk: 1, spd: 1, dodge: 0.2, tier: 0 },
       { n: 'TRANSCENDENT', hair: '#f1f5f9', aura: '#ffffff', aura2: '#38bdf8', atk: 1.3, spd: 1.4, dodge: 0.5, tier: 2 }],
     special: ['Sky Burst', '#bae6fd'], ultimate: 'Final Awakening', passive: 'Auto-dodge 20%, rising to 50% when Transcendent' },
-  { id: 'oblivion', name: 'OBLIVION', style: 'Destroyer God', hair: 'dome', blast: '#d8b4fe', erase: true,
+  { id: 'oblivion', name: 'OBLIVION', style: 'Destroyer God', hair: 'dome', blast: '#d8b4fe', erase: true, armor: true, cape: true,
     look: { skin: '#a78bfa', gi: '#4c1d95', trim: '#facc15', limb: 'skin' },
     stats: { hp: 1.2, atk: 1.25, spd: 1.0, ki: 1.1 },
     forms: [
       { n: 'BASE', hair: '#6d28d9', aura: '#a855f7', atk: 1, spd: 1, tier: 0 },
       { n: 'WRATH', hair: '#ef4444', aura: '#ef4444', aura2: '#a855f7', atk: 1.4, spd: 1.1, explosive: true, tier: 2 }],
     special: ['Annihilate', '#d8b4fe'], ultimate: 'Sphere of Ruin', passive: 'Skill 1 erases every enemy projectile on screen' },
-  { id: 'seraph', name: 'SERAPH', style: 'Celestial Guide', hair: 'swept', blast: '#fde68a', sword: true, revive: true,
+  { id: 'seraph', name: 'SERAPH', style: 'Celestial Guide', hair: 'swept', blast: '#fde68a', sword: true, revive: true, cape: true,
     look: { skin: '#fde7d0', gi: '#38bdf8', trim: '#ffffff', limb: 'gi' },
     stats: { hp: 1.0, atk: 1.0, spd: 1.25, ki: 1.3 },
     forms: [
@@ -448,7 +456,17 @@ const HEROES = [
       { n: 'BASE', hair: '#111827', aura: '#93c5fd', atk: 1, spd: 1, tier: 0 },
       { n: 'AWAKENED', hair: '#fde047', aura: '#facc15', aura2: '#38bdf8', atk: 1.5, spd: 1.2, tier: 2 },
       { n: 'BEAST', hair: '#f8fafc', aura: '#f8fafc', aura2: '#ef4444', atk: 2.2, spd: 1.5, dodge: 0.3, tier: 5 }],
-    special: ['Beast Cannon', '#ef4444'], ultimate: 'Beast Fury', passive: 'Beast form: red lightning, 30% dodge' }
+    special: ['Beast Cannon', '#ef4444'], ultimate: 'Beast Fury', passive: 'Beast form: red lightning, 30% dodge' },
+  { id: 'ryujin', name: 'RYU JIN', style: 'Dragon Soul', hair: 'spiky', blast: '#fb923c', cape: true,
+    look: { skin: '#fcd9b6', gi: '#b45309', trim: '#fde047', limb: 'gi' },
+    stats: { hp: 1.05, atk: 1.15, spd: 1.1, ki: 1.15 },
+    forms: [
+      { n: 'BASE', hair: '#1c1917', aura: '#f97316', atk: 1, spd: 1, tier: 0 },
+      { n: 'EMBER AWAKENING', hair: '#fb923c', aura: '#fbbf24', atk: 1.2, spd: 1.1, tier: 1 },
+      { n: 'DRAGON SURGE', hair: '#facc15', aura: '#fde047', aura2: '#f97316', atk: 1.45, spd: 1.2, tier: 3 },
+      { n: 'CRIMSON WYRM', hair: '#ef4444', skin: '#fca5a5', aura: '#ef4444', aura2: '#fde047', atk: 1.75, spd: 1.35, explosive: true, tier: 4 },
+      { n: 'SOVEREIGN FLAME', hair: '#ffffff', aura: '#fde047', aura2: '#fb923c', atk: 2.35, spd: 1.55, dodge: 0.45, triple: true, tier: 5 }],
+    special: ['Dragon Fang Wave', '#fb923c'], ultimate: 'Sovereign Inferno', passive: 'Five forms up to Sovereign Flame · explosive in Crimson Wyrm' }
 ];
 const DIFFS = [
   { n: 'EASY', think: 0.9, err: 0.55, fire: 0.35, tele: 0.05, dmg: 0.6, reward: 60 },
@@ -458,7 +476,7 @@ const DIFFS = [
   { n: 'GOD TIER', think: 0.15, err: 0.04, fire: 1.6, tele: 0.7, dmg: 1.3, reward: 400 }
 ];
 
-const HX = { kairo: { crit: 30, price: 0 }, vorn: { crit: 35, price: 0 }, rex: { crit: 30, price: 0 }, zenji: { crit: 20, price: 100 }, nyx: { crit: 40, price: 150 }, omega: { crit: 25, price: 200 }, blaze: { crit: 30, price: 120 }, frost: { crit: 30, price: 140 }, titan: { crit: 25, price: 160 }, shade: { crit: 40, price: 180 }, volt: { crit: 35, price: 200 }, drake: { crit: 35, price: 250 }, astral: { crit: 40, price: 400 }, oblivion: { crit: 35, price: 500 }, seraph: { crit: 30, price: 450 }, chrono: { crit: 45, price: 350 }, ascendant: { crit: 40, price: 600 }, warden: { crit: 30, price: 700 }, zenith: { crit: 50, price: 900 }, monarch: { crit: 55, price: 2000 }, arbiter: { crit: 45, price: 1500 }, nekron: { crit: 45, price: 1200 }, aeon: { crit: 40, price: 1100 }, cipher: { crit: 50, price: 1000 }, bastion: { crit: 35, price: 1300 }, gemini: { crit: 50, price: 1700 }, primal: { crit: 45, price: 1400 }, roseblade: { crit: 50, price: 1500 }, glutton: { crit: 30, price: 1200 }, azure: { crit: 50, price: 1800 }, halfling: { crit: 50, price: 1600 } };
+const HX = { kairo: { crit: 30, price: 0 }, vorn: { crit: 35, price: 0 }, rex: { crit: 30, price: 0 }, zenji: { crit: 20, price: 100 }, nyx: { crit: 40, price: 150 }, omega: { crit: 25, price: 200 }, blaze: { crit: 30, price: 120 }, frost: { crit: 30, price: 140 }, titan: { crit: 25, price: 160 }, shade: { crit: 40, price: 180 }, volt: { crit: 35, price: 200 }, drake: { crit: 35, price: 250 }, astral: { crit: 40, price: 400 }, oblivion: { crit: 35, price: 500 }, seraph: { crit: 30, price: 450 }, chrono: { crit: 45, price: 350 }, ascendant: { crit: 40, price: 600 }, warden: { crit: 30, price: 700 }, zenith: { crit: 50, price: 900 }, monarch: { crit: 55, price: 2000 }, arbiter: { crit: 45, price: 1500 }, nekron: { crit: 45, price: 1200 }, aeon: { crit: 40, price: 1100 }, cipher: { crit: 50, price: 1000 }, bastion: { crit: 35, price: 1300 }, gemini: { crit: 50, price: 1700 }, primal: { crit: 45, price: 1400 }, roseblade: { crit: 50, price: 1500 }, glutton: { crit: 30, price: 1200 }, azure: { crit: 50, price: 1800 }, halfling: { crit: 50, price: 1600 }, ryujin: { crit: 45, price: 550 } };
 HEROES.forEach(h => Object.assign(h, HX[h.id]));
 const NOINP = { x: 0, y: 0, charge: false, blast: false, dash: false, vanish: false, transform: false, attack: false, block: false, s1: false, s2: false };
 
@@ -685,6 +703,8 @@ class Arena {
     const dmg = (last ? 7 : 3) * f.atk * form.atk * (h.sword && form.sword ? form.sword : 1) * D_ * (form.explosive ? 1.15 : 1);
     f.vx += nx * (last ? 700 : 380); f.vy += ny * (last ? 700 : 380);
     this.parts.push({ k: 'slash', x: f.x + nx * 70, y: f.y - 64 + ny * 70, ang: Math.atan2(ny, nx), r: 52 + (last ? 26 : 0), life: 0.16, max: 0.16, col: last ? '#fde047' : h.blast });
+    if (last) this.text(f.x, f.y - 210, 'FINISHER!', '#fde047', 32);
+    else if (f.combo > 1) this.text(f.x + nx * 40, f.y - 190, 'x' + f.combo, '#fff7cc', 22 + f.combo * 2);
     this.meleeHit(f, foe, dmg, last, nx, ny);
   }
   meleeHit(f, foe, dmg, last, nx, ny) {
@@ -905,6 +925,15 @@ function drawAura(f, form, scale) {
     ctx.fillStyle = rgba(form.aura2 || '#ffffff', 0.9); for (let i = 0; i < 8; i++) { const a = f.t * 2.4 + i * 0.785, rr = 58 + 8 * Math.sin(f.t * 5 + i); ctx.beginPath(); ctx.arc(Math.cos(a) * rr * 0.8, -62 + Math.sin(a) * rr * 1.2, 3, 0, 6.283); ctx.fill(); }
     ctx.restore();
   }
+  if (strong) { // ground shockwave rings (expanding, fading)
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      const ph = (f.t * 1.3 + i / 3) % 1, rr = 14 + ph * 90;
+      ctx.globalAlpha = (1 - ph) * 0.75; ctx.strokeStyle = form.aura2 || form.aura;
+      ctx.beginPath(); ctx.ellipse(0, 2, rr * 1.55, rr * 0.4, 0, 0, 6.283); ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
 }
 function drawFighter(f, o = {}) {
   const form = f.form(), h = f.hero, L = h.look;
@@ -921,9 +950,22 @@ function drawFighter(f, o = {}) {
   const hover = (!f.onGround && spd < 140) ? Math.sin(f.t * 3) * 4 : 0; ctx.translate(0, hover);
   ctx.translate(0, -52); ctx.rotate(p[8]); ctx.translate(0, 52);
   const hip = [0, -52], sh = [0, -92];
-  limb(sh[0], sh[1], p[2], p[3], 22, 22, limbCol, 7);                                                   // back arm
+  if (h.cape) { // flowing cape, drawn behind the limbs/torso
+    const sway = Math.sin(f.t * 3) * 8 + (-lean) * 18;
+    ctx.fillStyle = L.trim; ctx.beginPath();
+    ctx.moveTo(sh[0] - 6, sh[1] + 2);
+    ctx.quadraticCurveTo(sh[0] - 26 + sway * 0.3, sh[1] + 40, sh[0] - 20 + sway, hip[1] + 34);
+    ctx.quadraticCurveTo(sh[0] - 10 + sway * 0.6, hip[1] + 10, sh[0] + 2, hip[1] + 4);
+    ctx.closePath(); ctx.fill();
+  }
+  const ba = limb(sh[0], sh[1], p[2], p[3], 22, 22, limbCol, 7);                                        // back arm
+  ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(ba[0], ba[1], 5, 0, 6.283); ctx.fill();                 // back fist
   const bl = limb(hip[0], hip[1], p[6], p[7], 26, 26, limbCol, 8); ctx.fillStyle = L.trim; ctx.beginPath(); ctx.arc(bl[0], bl[1], 5, 0, 6.283); ctx.fill();
-  ctx.strokeStyle = gi; ctx.lineWidth = 13; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hip[0], hip[1]); ctx.lineTo(sh[0], sh[1]); ctx.stroke();       // torso
+  const shW = 16, hipW = 10;                                                                              // torso (tapered filled gi body, not a thin stick)
+  ctx.fillStyle = gi; ctx.beginPath(); ctx.moveTo(sh[0] - shW, sh[1]); ctx.lineTo(sh[0] + shW, sh[1]); ctx.lineTo(hip[0] + hipW, hip[1]); ctx.lineTo(hip[0] - hipW, hip[1]); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.16)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sh[0] - shW * 0.5, sh[1] + 4); ctx.lineTo(hip[0] - hipW * 0.5, hip[1] - 4); ctx.stroke(); // shoulder highlight
+  ctx.strokeStyle = L.trim; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(sh[0] - 7, sh[1] + 2); ctx.lineTo(sh[0], sh[1] + 11); ctx.lineTo(sh[0] + 7, sh[1] + 2); ctx.stroke(); // collar
+  if (h.armor) { ctx.fillStyle = L.trim; ctx.beginPath(); ctx.ellipse(sh[0] - 15, sh[1] + 3, 9, 6.5, 0.2, 0, 6.283); ctx.fill(); ctx.beginPath(); ctx.ellipse(sh[0] + 15, sh[1] + 3, 9, 6.5, -0.2, 0, 6.283); ctx.fill(); } // shoulder armor
   ctx.strokeStyle = L.trim; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-8, hip[1] - 2); ctx.lineTo(8, hip[1] - 2); ctx.stroke();                     // belt
   if (L.spots) { ctx.fillStyle = L.trim; for (const [sx, sy] of [[-3, -80], [4, -68], [-2, -60]]) { ctx.beginPath(); ctx.arc(sx, sy, 2, 0, 6.283); ctx.fill(); } }
   const fl = limb(hip[0], hip[1], p[4], p[5], 26, 26, limbCol, 8); ctx.fillStyle = L.trim; ctx.beginPath(); ctx.arc(fl[0], fl[1], 5, 0, 6.283); ctx.fill();
@@ -932,8 +974,19 @@ function drawFighter(f, o = {}) {
   drawHair(f, form, hx, hy);
   ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hx + 5, hy + 1); ctx.lineTo(hx + 11, hy + 1); ctx.moveTo(hx + 4, hy - 4); ctx.lineTo(hx + 12, hy - 2); ctx.stroke(); // eye + brow
   const fa = limb(sh[0], sh[1], p[0], p[1], 22, 22, limbCol, 7);                                         // front arm
-  if (L.limb === 'gi') { ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(fa[0], fa[1], 4.5, 0, 6.283); ctx.fill(); }
+  ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(fa[0], fa[1], 5, 0, 6.283); ctx.fill();                 // front fist
   if (h.sword) { const a = fa[2] - 0.2, len = form.sword ? 62 : 52; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(fa[0] - Math.cos(a) * 6, fa[1] - Math.sin(a) * 6); ctx.lineTo(fa[0] + Math.cos(a) * len, fa[1] + Math.sin(a) * len); ctx.stroke(); ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(fa[0] - Math.cos(a) * 6, fa[1] - Math.sin(a) * 6); ctx.lineTo(fa[0] + Math.cos(a) * 4, fa[1] + Math.sin(a) * 4); ctx.stroke(); }
+  if (f.charging) { // charging energy orb gathering between the hands
+    const ox = (fa[0] + ba[0]) / 2, oy = (fa[1] + ba[1]) / 2, kiT = (f.ki || 0) / 100;
+    const R = 9 + 42 * Math.min(1, kiT + 0.18) * (0.9 + 0.15 * Math.sin(f.t * 26));
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const og = ctx.createRadialGradient(ox, oy, 0, ox, oy, R * 1.7);
+    og.addColorStop(0, '#ffffff'); og.addColorStop(0.35, rgba(form.aura2 || form.aura, 0.95)); og.addColorStop(1, rgba(form.aura, 0));
+    ctx.fillStyle = og; ctx.beginPath(); ctx.arc(ox, oy, R * 1.7, 0, 6.283); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.6;
+    for (let i = 0; i < 6; i++) { const ang = f.t * 11 + i * 1.047, rr = R * 2.8 + 8 * Math.sin(f.t * 9 + i); const sx = ox + Math.cos(ang) * rr, sy = oy + Math.sin(ang) * rr * 0.6; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ox + Math.cos(ang) * R * 0.3, oy + Math.sin(ang) * R * 0.3 * 0.6); ctx.stroke(); }
+    ctx.restore();
+  }
   ctx.restore();
 }
 
